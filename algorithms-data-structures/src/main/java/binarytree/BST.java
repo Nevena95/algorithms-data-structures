@@ -1,6 +1,7 @@
 package binarytree;
 
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Stack;
 
@@ -48,6 +49,72 @@ public class BST {
                 current = current.right_child;
             }
         }
+    }
+
+    public void delete(int val) {
+        delete_internal(val, root);
+    }
+
+    private void delete_internal(int val, Node root) {
+        if (root == null) {
+            return;
+        }
+
+        Node current = root;
+
+        while (true) {
+            if (val < current.value) {
+                if (current.left_child == null) {
+                    throw new NoSuchElementException("Missing value " + val);
+                }
+                current = current.left_child;
+                continue;
+            }
+
+            if (val > current.value) {
+                if (current.right_child == null) {
+                    throw new NoSuchElementException("Missing value " + val);
+                }
+                current = current.right_child;
+                continue;
+            }
+
+            if (isLeaf(current)) {
+                if (current == root) {
+                    root = null;
+                    return;
+                }
+            }
+
+            if (current.left_child == null) {
+                current.value = current.right_child.value;
+                current.left_child = current.right_child.left_child;
+                current.right_child = current.right_child.right_child;
+                return;
+            }
+
+            if (current.right_child == null) {
+                current.value = current.left_child.value;
+                current.right_child = current.left_child.right_child;
+                current.left_child = current.left_child.left_child;
+                return;
+            }
+
+            // has both left and right child
+            Node successor = current.right_child;
+
+            while (successor.left_child != null) {
+                successor = successor.left_child;
+            }
+
+            current.value = successor.value;
+
+            delete_internal(successor.value, current.right_child);      // u desnom podstablu trazi i brise, rekurzivno
+        }
+    }
+
+    private boolean isLeaf(Node current) {
+        return current.left_child == null && current.right_child == null;
     }
 
     // left -> root -> right
@@ -157,5 +224,9 @@ public class BST {
         bst.postorder();
         System.out.print("\nLevelorder: ");
         bst.levelorder();
+
+        bst.delete(6);
+        System.out.print("Inorder: ");
+        bst.inorder();
     }
 }
